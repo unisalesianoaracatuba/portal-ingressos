@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta de Pontos — Evento</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f0;
+      --surface: #ffffff;
+      --surface2: #f0efea;
+      --border: rgba(0,0,0,0.12);
+      --border2: rgba(0,0,0,0.22);
+      --text: #1a1a18;
+      --text2: #6b6b67;
+      --text3: #9a9a96;
+      --green: #1D9E75;
+      --green-dark: #0F6E56;
+      --green-light: #E1F5EE;
+      --green-text: #085041;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a18;
+        --surface: #242422;
+        --surface2: #2e2e2b;
+        --border: rgba(255,255,255,0.10);
+        --border2: rgba(255,255,255,0.20);
+        --text: #f0efe8;
+        --text2: #a0a09a;
+        --text3: #6b6b67;
+        --green-light: #04342C;
+        --green-text: #9FE1CB;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+
+    .logo-icon i {
+      font-size: 26px;
+      color: #fff;
+    }
+
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .logo p {
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      height: 44px;
+      padding: 0 14px;
+      font-size: 15px;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.15);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--text3);
+    }
+
+    button {
+      height: 44px;
+      padding: 0 20px;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    button:hover { background: var(--green-dark); }
+    button:active { transform: scale(0.98); }
+
+    .result { display: none; }
+    .result.visible { display: block; }
+
+    .ra-header {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 14px;
+    }
+
+    .ra-header strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .metric {
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+
+    .metric-label {
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 30px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .metric-sub {
+      font-size: 12px;
+      color: var(--text3);
+      margin-top: 4px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 99px;
+      transition: width 0.7s cubic-bezier(.4,0,.2,1);
+    }
+
+    .progress-msg {
+      font-size: 13px;
+      color: var(--text2);
+      margin-top: 10px;
+    }
+
+    .cortesias-title {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 14px;
+      border-radius: 99px;
+    }
+
+    .chip.earned {
+      background: var(--green-light);
+      color: var(--green-text);
+    }
+
+    .chip.pending {
+      background: var(--surface2);
+      color: var(--text3);
+    }
+
+    .not-found {
+      display: none;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .not-found.visible { display: block; }
+
+    .not-found i {
+      font-size: 32px;
+      color: var(--text3);
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .not-found p {
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 2.5rem;
+      font-size: 12px;
+      color: var(--text3);
+    }
+
+    /* =============================================
+       CONFIGURAÇÃO — edite apenas esta seção
+       ============================================= */
+    /*
+      SHEET_URL: cole a URL CSV da sua planilha Google Sheets publicada.
+      Para obter:
+        1. Abra a planilha no Google Sheets
+        2. Arquivo → Compartilhar → Publicar na web
+        3. Escolha a aba correta e formato CSV
+        4. Clique em Publicar e copie o link
+    */
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="logo">
+    <div class="logo-icon"><i class="ti ti-ticket"></i></div>
+    <h1>Consulta de pontos</h1>
+    <p>Digite seu RA para ver seu saldo de ingressos</p>
+  </div>
+
+  <div class="card">
+    <label for="ra-input">Número de RA</label>
+    <div class="search-row">
+      <input type="text" id="ra-input" placeholder="Ex: 2023001234" maxlength="20" />
+      <button onclick="buscar()"><i class="ti ti-search"></i> Buscar</button>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <p class="ra-header">Resultado para o RA <strong id="ra-display"></strong></p>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Ingressos vendidos</div>
+        <div class="metric-value" id="vendidos-val">0</div>
+        <div class="metric-sub">no seu RA</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Cortesias ganhas</div>
+        <div class="metric-value" id="cortesias-val">0</div>
+        <div class="metric-sub">a cada 10 pontos</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 1rem;">
+      <div class="progress-label">
+        <span>Progresso para a próxima cortesia</span>
+        <span id="progress-text">0 / 10</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+      <p class="progress-msg" id="progress-msg"></p>
+    </div>
+
+    <div class="card">
+      <p class="cortesias-title">Histórico de cortesias</p>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <div class="not-found" id="not-found">
+    <i class="ti ti-user-search"></i>
+    <p>RA não encontrado. Verifique o número e tente novamente.</p>
+  </div>
+
+  <div class="footer">
+    Dados atualizados diariamente pela coordenação do evento.
+  </div>
+
+</div>
+
+<script>
+  // =============================================
+  // ⚙️ CONFIGURAÇÃO — edite aqui
+  // =============================================
+
+  // Cole aqui a URL CSV da sua planilha Google Sheets publicada:
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlHSse7l8Pkjic7jwMPDUgzlfoSXGslMZYn8HTQlIWhImppu5XpSiaeF4A89xiYJC3aECV7sLIJqpr/pub?output=csv";
+
+  // Título do evento (aparece na aba do navegador):
+  document.title = "Consulta de Pontos — Seu Evento";
+
+  // =============================================
+  // Lógica (não precisa alterar abaixo)
+  // =============================================
+
+  let dadosCache = null;
+
+  async function carregarDados() {
+    if (dadosCache) return dadosCache;
+
+    // Se a URL ainda não foi configurada, usa dados de exemplo
+    if (SHEET_URL === "SUA_URL_DA_PLANILHA_AQUI") {
+      dadosCache = {
+        "2023001234": 23,
+        "2022005678": 10,
+        "2021009999": 7,
+        "2024001111": 34,
+        "2023007777": 1
+      };
+      return dadosCache;
+    }
+
+    try {
+      const resp = await fetch(SHEET_URL);
+      const csv = await resp.text();
+      const linhas = csv.trim().split("\n").slice(1); // pula cabeçalho
+      const mapa = {};
+      linhas.forEach(linha => {
+        const partes = linha.split(",");
+        const ra = (partes[0] || "").trim().replace(/"/g, "");
+        const vendidos = parseInt((partes[1] || "0").trim().replace(/"/g, "")) || 0;
+        if (ra) mapa[ra] = vendidos;
+      });
+      dadosCache = mapa;
+      return mapa;
+    } catch (e) {
+      console.error("Erro ao carregar planilha:", e);
+      return null;
+    }
+  }
+
+  async function buscar() {
+    const ra = document.getElementById("ra-input").value.trim();
+    if (!ra) return;
+
+    document.getElementById("result").classList.remove("visible");
+    document.getElementById("not-found").classList.remove("visible");
+
+    const dados = await carregarDados();
+
+    if (!dados || !(ra in dados)) {
+      document.getElementById("not-found").classList.add("visible");
+      return;
+    }
+
+    const vendidos = dados[ra];
+    const cortesias = Math.floor(vendidos / 10);
+    const resto = vendidos % 10;
+    const faltam = resto === 0 ? 10 : 10 - resto;
+    const pct = Math.round((resto / 10) * 100);
+
+    document.getElementById("ra-display").textContent = ra;
+    document.getElementById("vendidos-val").textContent = vendidos;
+    document.getElementById("cortesias-val").textContent = cortesias;
+    document.getElementById("progress-text").textContent = resto + " / 10";
+    document.getElementById("progress-fill").style.width = pct + "%";
+
+    if (resto === 0 && vendidos > 0) {
+      document.getElementById("progress-msg").textContent = "Você acabou de ganhar uma cortesia! Parabéns 🎉";
+    } else if (faltam === 1) {
+      document.getElementById("progress-msg").textContent = "Falta apenas 1 ingresso para sua próxima cortesia!";
+    } else {
+      document.getElementById("progress-msg").textContent = "Faltam " + faltam + " ingressos para sua próxima cortesia.";
+    }
+
+    // Chips de cortesias
+    const chips = document.getElementById("chips");
+    chips.innerHTML = "";
+    const totalMostrar = Math.max(cortesias + 1, 3);
+    for (let i = 1; i <= totalMostrar; i++) {
+      const earned = i <= cortesias;
+      const chip = document.createElement("div");
+      chip.className = "chip " + (earned ? "earned" : "pending");
+      chip.innerHTML = '<i class="ti ti-' + (earned ? "ticket" : "lock") + '"></i> Cortesia ' + i;
+      chips.appendChild(chip);
+    }
+
+    document.getElementById("result").classList.add("visible");
+  }
+
+  document.getElementById("ra-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") buscar();
+  });
+</script>
+
+</body>
+</html>
