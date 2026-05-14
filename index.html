@@ -410,23 +410,18 @@
 
   document.title = "Consulta de Pontos — Seu Evento";
 
-  let dadosCache = null;
-
   async function carregarDados() {
     try {
       const resp = await fetch(SHEET_URL + "&t=" + Date.now());
       const csv = await resp.text();
-      const linhas = csv.trim().split("\n").slice(1);
+      const linhas = csv.trim().split("\n").slice(1); // pula cabeçalho
       const mapa = {};
-
       linhas.forEach(linha => {
         const partes = linha.split(",");
         const ra = (partes[0] || "").trim().replace(/"/g, "");
-        if (ra) {
-          mapa[ra] = (mapa[ra] || 0) + 1;
-        }
+        const vendidos = parseInt((partes[1] || "0").trim().replace(/"/g, "")) || 0;
+        if (ra) mapa[ra] = vendidos;
       });
-
       return mapa;
     } catch (e) {
       console.error("Erro ao carregar planilha:", e);
@@ -435,9 +430,8 @@
   }
 
   function setLoading(ativo) {
-    const btn = document.getElementById("btn-buscar");
     document.getElementById("loading").classList.toggle("visible", ativo);
-    btn.disabled = ativo;
+    document.getElementById("btn-buscar").disabled = ativo;
   }
 
   async function buscar() {
