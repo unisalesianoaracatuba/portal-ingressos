@@ -151,6 +151,37 @@
 
     button:hover { background: var(--green-dark); }
     button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .loading {
+      display: none;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .loading.visible { display: block; }
+
+    .loading i {
+      font-size: 28px;
+      color: var(--green);
+      display: block;
+      margin-bottom: 10px;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading p {
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
 
     .result { display: none; }
     .result.visible { display: block; }
@@ -319,8 +350,13 @@
     <label for="ra-input">Número de RA</label>
     <div class="search-row">
       <input type="text" id="ra-input" placeholder="Ex: 2023001234" maxlength="20" />
-      <button onclick="buscar()"><i class="ti ti-search"></i> Buscar</button>
+      <button id="btn-buscar" onclick="buscar()"><i class="ti ti-search"></i> Buscar</button>
     </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <i class="ti ti-loader"></i>
+    <p>Buscando dados, aguarde...</p>
   </div>
 
   <div class="result" id="result">
@@ -377,24 +413,20 @@
   let dadosCache = null;
 
   async function carregarDados() {
-    if (dadosCache) return dadosCache;
-
     try {
       const resp = await fetch(SHEET_URL + "&t=" + Date.now());
       const csv = await resp.text();
-      const linhas = csv.trim().split("\n").slice(1); // pula cabeçalho
+      const linhas = csv.trim().split("\n").slice(1);
       const mapa = {};
 
       linhas.forEach(linha => {
         const partes = linha.split(",");
         const ra = (partes[0] || "").trim().replace(/"/g, "");
         if (ra) {
-          // conta uma ocorrência a cada linha que o RA aparece
           mapa[ra] = (mapa[ra] || 0) + 1;
         }
       });
 
-      dadosCache = mapa;
       return mapa;
     } catch (e) {
       console.error("Erro ao carregar planilha:", e);
@@ -402,16 +434,22 @@
     }
   }
 
+  function setLoading(ativo) {
+    const btn = document.getElementById("btn-buscar");
+    document.getElementById("loading").classList.toggle("visible", ativo);
+    btn.disabled = ativo;
+  }
+
   async function buscar() {
     const ra = document.getElementById("ra-input").value.trim();
     if (!ra) return;
 
-    dadosCache = null;
-
     document.getElementById("result").classList.remove("visible");
     document.getElementById("not-found").classList.remove("visible");
+    setLoading(true);
 
     const dados = await carregarDados();
+    setLoading(false);
 
     if (!dados || !(ra in dados)) {
       document.getElementById("not-found").classList.add("visible");
