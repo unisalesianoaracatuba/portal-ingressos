@@ -379,28 +379,21 @@
   async function carregarDados() {
     if (dadosCache) return dadosCache;
 
-    if (SHEET_URL === "SUA_URL_DA_PLANILHA_AQUI") {
-      dadosCache = {
-        "2023001234": 23,
-        "2022005678": 10,
-        "2021009999": 7,
-        "2024001111": 34,
-        "2023007777": 1
-      };
-      return dadosCache;
-    }
-
     try {
       const resp = await fetch(SHEET_URL + "&t=" + Date.now());
       const csv = await resp.text();
-      const linhas = csv.trim().split("\n").slice(1);
+      const linhas = csv.trim().split("\n").slice(1); // pula cabeçalho
       const mapa = {};
+
       linhas.forEach(linha => {
         const partes = linha.split(",");
         const ra = (partes[0] || "").trim().replace(/"/g, "");
-        const vendidos = parseInt((partes[1] || "0").trim().replace(/"/g, "")) || 0;
-        if (ra) mapa[ra] = vendidos;
+        if (ra) {
+          // conta uma ocorrência a cada linha que o RA aparece
+          mapa[ra] = (mapa[ra] || 0) + 1;
+        }
       });
+
       dadosCache = mapa;
       return mapa;
     } catch (e) {
