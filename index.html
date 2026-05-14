@@ -278,9 +278,23 @@
       margin-bottom: 10px;
     }
 
+    .not-found-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
     .not-found p {
       font-size: 14px;
       color: var(--text2);
+    }
+
+    .not-found-hint {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--text3);
+      line-height: 1.5;
     }
 
     .footer {
@@ -289,18 +303,6 @@
       font-size: 12px;
       color: var(--text3);
     }
-
-    /* =============================================
-       CONFIGURAÇÃO — edite apenas esta seção
-       ============================================= */
-    /*
-      SHEET_URL: cole a URL CSV da sua planilha Google Sheets publicada.
-      Para obter:
-        1. Abra a planilha no Google Sheets
-        2. Arquivo → Compartilhar → Publicar na web
-        3. Escolha a aba correta e formato CSV
-        4. Clique em Publicar e copie o link
-    */
   </style>
 </head>
 <body>
@@ -356,7 +358,9 @@
 
   <div class="not-found" id="not-found">
     <i class="ti ti-user-search"></i>
-    <p>RA não encontrado. Verifique o número e tente novamente.</p>
+    <p class="not-found-title">RA não encontrado</p>
+    <p>Verifique se o número foi digitado corretamente e tente novamente.</p>
+    <p class="not-found-hint">Caso o RA esteja correto, é possível que ainda não haja nenhuma venda registrada para ele — os dados são atualizados diariamente pela coordenação.</p>
   </div>
 
   <div class="footer">
@@ -366,26 +370,15 @@
 </div>
 
 <script>
-  // =============================================
-  // ⚙️ CONFIGURAÇÃO — edite aqui
-  // =============================================
-
-  // Cole aqui a URL CSV da sua planilha Google Sheets publicada:
   const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlHSse7l8Pkjic7jwMPDUgzlfoSXGslMZYn8HTQlIWhImppu5XpSiaeF4A89xiYJC3aECV7sLIJqpr/pub?output=csv";
 
-  // Título do evento (aparece na aba do navegador):
   document.title = "Consulta de Pontos — Seu Evento";
-
-  // =============================================
-  // Lógica (não precisa alterar abaixo)
-  // =============================================
 
   let dadosCache = null;
 
   async function carregarDados() {
     if (dadosCache) return dadosCache;
 
-    // Se a URL ainda não foi configurada, usa dados de exemplo
     if (SHEET_URL === "SUA_URL_DA_PLANILHA_AQUI") {
       dadosCache = {
         "2023001234": 23,
@@ -400,7 +393,7 @@
     try {
       const resp = await fetch(SHEET_URL + "&t=" + Date.now());
       const csv = await resp.text();
-      const linhas = csv.trim().split("\n").slice(1); // pula cabeçalho
+      const linhas = csv.trim().split("\n").slice(1);
       const mapa = {};
       linhas.forEach(linha => {
         const partes = linha.split(",");
@@ -452,7 +445,6 @@
       document.getElementById("progress-msg").textContent = "Faltam " + faltam + " ingressos para sua próxima cortesia.";
     }
 
-    // Chips de cortesias
     const chips = document.getElementById("chips");
     chips.innerHTML = "";
     const totalMostrar = Math.max(cortesias + 1, 3);
