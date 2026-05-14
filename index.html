@@ -398,7 +398,7 @@
     }
 
     try {
-      const resp = await fetch(SHEET_URL);
+      const resp = await fetch(SHEET_URL + "&t=" + Date.now());
       const csv = await resp.text();
       const linhas = csv.trim().split("\n").slice(1); // pula cabeçalho
       const mapa = {};
@@ -419,6 +419,8 @@
   async function buscar() {
     const ra = document.getElementById("ra-input").value.trim();
     if (!ra) return;
+
+    dadosCache = null;
 
     document.getElementById("result").classList.remove("visible");
     document.getElementById("not-found").classList.remove("visible");
